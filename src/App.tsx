@@ -269,7 +269,29 @@ function AppContent() {
       </main>
 
       <Navigation activeTab={activeTab} setActiveTab={handleTabChange} />
-      <TransactionForm open={formOpen} onOpenChange={setFormOpen} />
+      <TransactionForm 
+        open={formOpen} 
+        onOpenChange={setFormOpen} 
+        onSuccess={() => {
+          // Reload data after successful transaction save
+          const loadData = async () => {
+            try {
+              const monthStr = format(selectedMonth, "yyyy-MM");
+              const [transData, catsData, settingsData] = await Promise.all([
+                dbService.getTransactions(ADMIN_ID, monthStr),
+                dbService.getCategories(ADMIN_ID),
+                dbService.getSettings(ADMIN_ID),
+              ]);
+              setTransactions(transData || []);
+              setCategories(catsData || []);
+              setSettings(settingsData);
+            } catch (error) {
+              console.error('Error reloading data:', error);
+            }
+          };
+          loadData();
+        }}
+      />
       <Toaster position="top-center" theme="dark" />
     </div>
   );
