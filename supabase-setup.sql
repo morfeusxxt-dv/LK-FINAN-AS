@@ -64,6 +64,19 @@ ALTER TABLE transactions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE budgets DISABLE ROW LEVEL SECURITY;
 ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
 
+-- Insert initial categories for admin user
+INSERT INTO categories (name, type, color, user_id) VALUES
+  ('Salário', 'income', '#10b981', '00000000-0000-0000-0000-000000000000'),
+  ('Freelance', 'income', '#3b82f6', '00000000-0000-0000-0000-000000000000'),
+  ('Investimentos', 'income', '#f59e0b', '00000000-0000-0000-0000-000000000000'),
+  ('Alimentação', 'expense', '#ef4444', '00000000-0000-0000-0000-000000000000'),
+  ('Transporte', 'expense', '#f97316', '00000000-0000-0000-0000-000000000000'),
+  ('Moradia', 'expense', '#8b5cf6', '00000000-0000-0000-0000-000000000000'),
+  ('Lazer', 'expense', '#ec4899', '00000000-0000-0000-0000-000000000000'),
+  ('Saúde', 'expense', '#06b6d4', '00000000-0000-0000-0000-000000000000'),
+  ('Educação', 'expense', '#6366f1', '00000000-0000-0000-0000-000000000000')
+ON CONFLICT DO NOTHING;
+
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -74,6 +87,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for settings table
+DROP TRIGGER IF EXISTS update_settings_updated_at ON settings;
 CREATE TRIGGER update_settings_updated_at
   BEFORE UPDATE ON settings
   FOR EACH ROW
