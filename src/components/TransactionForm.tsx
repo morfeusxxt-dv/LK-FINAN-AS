@@ -68,6 +68,11 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
   const transactionType = form.watch("type");
   const filteredCategories = categories.filter(c => c.type === transactionType);
 
+  useEffect(() => {
+    console.log("Categories loaded:", categories);
+    console.log("Filtered categories:", filteredCategories);
+  }, [categories, filteredCategories]);
+
   // Reset categoryId when type changes
   React.useEffect(() => {
     form.setValue("categoryId", "");
@@ -167,22 +172,30 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
                   <FormItem>
                     <FormLabel>Categoria</FormLabel>
                     <FormControl>
-                      <div className="grid grid-cols-2 gap-2">
-                        {filteredCategories.map((category) => (
-                          <Button
-                            key={category.id}
-                            type="button"
-                            variant={field.value === category.id?.toString() ? "default" : "outline"}
-                            onClick={() => field.onChange(category.id?.toString() || "")}
-                            className={field.value === category.id?.toString() ? "bg-sky-500 hover:bg-sky-600" : ""}
-                            style={{
-                              borderColor: category.color,
-                            }}
-                          >
-                            {category.name}
-                          </Button>
-                        ))}
-                      </div>
+                      {filteredCategories.length === 0 ? (
+                        <div className="text-center py-4 text-sm text-slate-400">
+                          {categories.length === 0 
+                            ? "Nenhuma categoria cadastrada. Vá em Categorias para criar." 
+                            : `Nenhuma categoria de ${transactionType === 'expense' ? 'gasto' : 'ganho'} disponível.`}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          {filteredCategories.map((category) => (
+                            <Button
+                              key={category.id}
+                              type="button"
+                              variant={field.value === category.id?.toString() ? "default" : "outline"}
+                              onClick={() => field.onChange(category.id?.toString() || "")}
+                              className={field.value === category.id?.toString() ? "bg-sky-500 hover:bg-sky-600" : ""}
+                              style={{
+                                borderColor: category.color,
+                              }}
+                            >
+                              {category.name}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
