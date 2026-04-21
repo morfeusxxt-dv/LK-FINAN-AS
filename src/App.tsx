@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Snowflake, LogOut } from "lucide-react";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { simpleAuth } from "./lib/simple-auth";
 import { dbService } from "./lib/supabase-db";
 import { Navigation } from "./components/Navigation";
 import { SummaryCards } from "./components/SummaryCards";
@@ -12,7 +12,7 @@ import { TransactionForm } from "./components/TransactionForm";
 import { MonthSelector } from "./components/MonthSelector";
 import { Settings } from "./components/Settings";
 import { CategoryManager } from "./components/CategoryManager";
-import { Auth } from "./components/Auth";
+import { SimpleLogin } from "./components/SimpleLogin";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { Progress, ProgressTrack, ProgressIndicator } from "../components/ui/progress";
@@ -24,7 +24,8 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Transaction, Category, AppSettings } from "./lib/supabase-types";
 
 function AppContent() {
-  const { user, loading, signOut } = useAuth();
+  const isAuthenticated = simpleAuth.isAuthenticated();
+  const user = simpleAuth.getUser();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
@@ -32,16 +33,19 @@ function AppContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<AppSettings | null>(null);
 
+  // ID fixo para usuário admin (não usamos mais user_id do Supabase)
+  const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
+
   useEffect(() => {
-    if (!user) return;
+    if (!isAuthenticated) return;
 
     const loadData = async () => {
       try {
         const monthStr = format(selectedMonth, "yyyy-MM");
         const [transData, catsData, settingsData] = await Promise.all([
-          dbService.getTransactions(user.id, monthStr),
-          dbService.getCategories(user.id),
-          dbService.getSettings(user.id),
+          dbService.getTransactions(ADMIN_ID, monthStr),
+          dbService.getCategories(ADMIN_ID),
+          dbService.getSettings(ADMIN_ID),
         ]);
         setTransactions(transData || []);
         setCategories(catsData || []);
@@ -54,13 +58,13 @@ function AppContent() {
     loadData();
 
     // Subscribe to real-time updates
-    const transSubscription = dbService.subscribeToTransactions(user.id, () => {
+    const transSubscription = dbService.subscribeToTransactions(ADMIN_ID, () => {
       loadData();
     });
-    const catsSubscription = dbService.subscribeToCategories(user.id, () => {
+    const catsSubscription = dbService.subscribeToCategories(ADMIN_ID, () => {
       loadData();
     });
-    const settingsSubscription = dbService.subscribeToSettings(user.id, () => {
+    const settingsSubscription = dbService.subscribeToSettings(ADMIN_ID, () => {
       loadData();
     });
 
@@ -69,34 +73,23 @@ function AppContent() {
       catsSubscription.unsubscribe();
       settingsSubscription.unsubscribe();
     };
-  }, [user, selectedMonth]);
+  }, [isAuthenticated, selectedMonth]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!isAuthenticated) return;
     
-    const hasVisited = localStorage.getItem("has_visited_finance_app_v2");
+    const hasVisited = localStorage.getItem("has_visited_finance_app_v3");
     if (!hasVisited) {
       toast("Bem-vindo!", {
-        description: "Seus dados ficam salvos na nuvem. Acesse de qualquer dispositivo e compartilhe com sua equipe.",
+        description: "Seus dados ficam salvos na nuvem.",
         duration: 10000,
       });
-      localStorage.setItem("has_visited_finance_app_v2", "true");
+      localStorage.setItem("has_visited_finance_app_v3", "true");
     }
-  }, [user]);
+  }, [isAuthenticated]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#05070a] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-sky-500/30 border-t-sky-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-sm">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
+  if (!isAuthenticated) {
+    return <SimpleLogin />;
   }
 
   const monthStr = format(selectedMonth, "yyyy-MM");
@@ -125,13 +118,10 @@ function AppContent() {
     }
   };
 
-  const handleSignOut = async () => {
-    const result = await signOut();
-    if (result.success) {
-      toast.success('Logout realizado com sucesso!');
-    } else {
-      toast.error('Erro ao fazer logout');
-    }
+  const handleSignOut = () => {
+    simpleAuth.logout();
+    toast.success('Logout realizado com sucesso!');
+    window.location.reload();
   };
 
   const renderContent = () => {
@@ -286,9 +276,5 @@ function AppContent() {
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
+  return <AppContent />;
 }

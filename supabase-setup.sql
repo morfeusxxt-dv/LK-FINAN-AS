@@ -58,79 +58,11 @@ CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets(user_id);
 CREATE INDEX IF NOT EXISTS idx_budgets_month_year ON budgets(month_year);
 CREATE INDEX IF NOT EXISTS idx_settings_user_id ON settings(user_id);
 
--- Enable Row Level Security (RLS)
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
-
--- Create RLS policies for categories
-CREATE POLICY "Users can view their own categories"
-  ON categories FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own categories"
-  ON categories FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own categories"
-  ON categories FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own categories"
-  ON categories FOR DELETE
-  USING (auth.uid() = user_id);
-
--- Create RLS policies for transactions
-CREATE POLICY "Users can view their own transactions"
-  ON transactions FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own transactions"
-  ON transactions FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own transactions"
-  ON transactions FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own transactions"
-  ON transactions FOR DELETE
-  USING (auth.uid() = user_id);
-
--- Create RLS policies for budgets
-CREATE POLICY "Users can view their own budgets"
-  ON budgets FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own budgets"
-  ON budgets FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own budgets"
-  ON budgets FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own budgets"
-  ON budgets FOR DELETE
-  USING (auth.uid() = user_id);
-
--- Create RLS policies for settings
-CREATE POLICY "Users can view their own settings"
-  ON settings FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own settings"
-  ON settings FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own settings"
-  ON settings FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own settings"
-  ON settings FOR DELETE
-  USING (auth.uid() = user_id);
+-- Disable Row Level Security (RLS) for simple auth system
+ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE budgets DISABLE ROW LEVEL SECURITY;
+ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()

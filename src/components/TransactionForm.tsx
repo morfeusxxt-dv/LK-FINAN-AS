@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/select";
 import { dbService } from "../lib/supabase-db";
 import { Transaction, Category } from "../lib/supabase-types";
-import { useAuth } from "../contexts/AuthContext";
 import { toast } from "sonner";
 
 interface TransactionFormProps {
@@ -49,13 +48,12 @@ interface TransactionFormProps {
 }
 
 export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFormProps) {
-  const { user } = useAuth();
+  const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    if (!user) return;
-    dbService.getCategories(user.id).then(setCategories).catch(console.error);
-  }, [user]);
+    dbService.getCategories(ADMIN_ID).then(setCategories).catch(console.error);
+  }, []);
   
   const form = useForm({
     defaultValues: {
@@ -71,7 +69,6 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
   const filteredCategories = categories.filter(c => c.type === transactionType);
 
   const onSubmit = async (values: any) => {
-    if (!user) return;
     try {
       const transaction: Omit<Transaction, 'id' | 'created_at'> = {
         type: values.type as any,
@@ -80,7 +77,7 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
         description: values.description,
         date: values.date.toISOString(),
         month_year: format(values.date, "yyyy-MM"),
-        user_id: user.id,
+        user_id: ADMIN_ID,
       };
 
       await dbService.createTransaction(transaction);

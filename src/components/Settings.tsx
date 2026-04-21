@@ -5,29 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { dbService } from "../lib/supabase-db";
-import { useAuth } from "../contexts/AuthContext";
 import { toast } from "sonner";
 import { formatCurrency, parseBRCurrency } from "@/lib/utils";
 import type { AppSettings } from "../lib/supabase-types";
 
 export function Settings() {
-  const { user } = useAuth();
+  const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [budgetGoal, setBudgetGoal] = useState("");
 
   useEffect(() => {
-    if (!user) return;
-    dbService.getSettings(user.id).then(setSettings).catch(console.error);
-  }, [user]);
+    dbService.getSettings(ADMIN_ID).then(setSettings).catch(console.error);
+  }, []);
 
   const handleExport = async () => {
-    if (!user) return;
     try {
       const [transactions, categories, budgets, userSettings] = await Promise.all([
-        dbService.getTransactions(user.id),
-        dbService.getCategories(user.id),
-        dbService.getBudgets(user.id),
-        dbService.getSettings(user.id),
+        dbService.getTransactions(ADMIN_ID),
+        dbService.getCategories(ADMIN_ID),
+        dbService.getBudgets(ADMIN_ID),
+        dbService.getSettings(ADMIN_ID),
       ]);
 
       const data = {
@@ -55,7 +52,7 @@ export function Settings() {
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     try {
       const text = await file.text();
@@ -72,15 +69,14 @@ export function Settings() {
   };
 
   const handleClearData = async () => {
-    if (!user) return;
     if (confirm("TEM CERTEZA? Isso excluirá TODOS os seus dados permanentemente da nuvem. Esta ação não pode ser desfeita.")) {
       try {
-        const transactions = await dbService.getTransactions(user.id);
-        const categories = await dbService.getCategories(user.id);
+        const transactions = await dbService.getTransactions(ADMIN_ID);
+        const categories = await dbService.getCategories(ADMIN_ID);
         
         await Promise.all([
-          ...transactions.map(t => dbService.deleteTransaction(t.id, user.id)),
-          ...categories.map(c => dbService.deleteCategory(c.id, user.id)),
+          ...transactions.map(t => dbService.deleteTransaction(t.id, ADMIN_ID)),
+          ...categories.map(c => dbService.deleteCategory(c.id, ADMIN_ID)),
         ]);
         
         toast.success("Todos os dados foram excluídos.");
@@ -92,15 +88,14 @@ export function Settings() {
   };
 
   const handleSaveBudget = async () => {
-    if (!user) return;
     const amount = parseBRCurrency(budgetGoal);
     
     try {
       if (settings) {
-        await dbService.updateSettings(user.id, { monthly_budget_goal: amount });
+        await dbService.updateSettings(ADMIN_ID, { monthly_budget_goal: amount });
       } else {
         await dbService.createSettings({
-          user_id: user.id,
+          user_id: ADMIN_ID,
           currency: 'BRL',
           theme: 'dark',
           monthly_budget_goal: amount,

@@ -5,31 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { dbService } from "../lib/supabase-db";
-import { useAuth } from "../contexts/AuthContext";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import type { Category } from "../lib/supabase-types";
 
 export function CategoryManager() {
-  const { user } = useAuth();
+  const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
   const [categories, setCategories] = useState<Category[]>([]);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<"income" | "expense">("expense");
 
   useEffect(() => {
-    if (!user) return;
-    dbService.getCategories(user.id).then(setCategories).catch(console.error);
-  }, [user]);
+    dbService.getCategories(ADMIN_ID).then(setCategories).catch(console.error);
+  }, []);
 
   const handleAdd = async () => {
-    if (!newName.trim() || !user) return;
+    if (!newName.trim()) return;
     
     try {
       await dbService.createCategory({
         name: newName,
         type: newType,
         color: newType === 'income' ? '#10b981' : '#ef4444',
-        user_id: user.id,
+        user_id: ADMIN_ID,
       });
       setNewName("");
       toast.success("Categoria adicionada!");
@@ -39,10 +37,10 @@ export function CategoryManager() {
   };
 
   const handleDelete = async (id?: number) => {
-    if (!id || !user) return;
+    if (!id) return;
     
     // Check if category is used in transactions
-    const transactions = await dbService.getTransactions(user.id);
+    const transactions = await dbService.getTransactions(ADMIN_ID);
     const count = transactions.filter(t => t.category_id === id).length;
     if (count > 0) {
       toast.error("Esta categoria não pode ser excluída pois possui transações vinculadas.");
@@ -50,7 +48,7 @@ export function CategoryManager() {
     }
 
     if (confirm("Deseja excluir esta categoria?")) {
-      await dbService.deleteCategory(id, user.id);
+      await dbService.deleteCategory(id, ADMIN_ID);
       toast.success("Categoria removida.");
     }
   };
