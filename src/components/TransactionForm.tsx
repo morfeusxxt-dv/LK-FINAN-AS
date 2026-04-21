@@ -112,17 +112,26 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="expense">Gasto</SelectItem>
-                        <SelectItem value="income">Ganho</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          variant={field.value === "expense" ? "default" : "outline"}
+                          onClick={() => field.onChange("expense")}
+                          className={field.value === "expense" ? "bg-rose-500 hover:bg-rose-600" : ""}
+                        >
+                          Gasto
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={field.value === "income" ? "default" : "outline"}
+                          onClick={() => field.onChange("income")}
+                          className={field.value === "income" ? "bg-emerald-500 hover:bg-emerald-600" : ""}
+                        >
+                          Ganho
+                        </Button>
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
