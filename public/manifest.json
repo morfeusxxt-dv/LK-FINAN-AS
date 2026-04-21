@@ -1,20 +1,25 @@
 {
-  "short_name": "Finanças",
-  "name": "Finanças Pessoais",
+  "short_name": "LK Finanças",
+  "name": "LK Finanças - Gestão Financeira",
+  "description": "Sistema de gestão financeira pessoal",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2845/2845811.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2845/2845811.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#05070a",
+  "background_color": "#05070a",
+  "orientation": "portrait",
+  "categories": ["finance", "productivity"]
 }
