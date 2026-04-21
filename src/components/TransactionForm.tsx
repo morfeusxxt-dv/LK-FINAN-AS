@@ -68,6 +68,11 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
   const transactionType = form.watch("type");
   const filteredCategories = categories.filter(c => c.type === transactionType);
 
+  // Reset categoryId when type changes
+  React.useEffect(() => {
+    form.setValue("categoryId", "");
+  }, [transactionType, form]);
+
   const onSubmit = async (values: any) => {
     try {
       const transaction: Omit<Transaction, 'id' | 'created_at'> = {
@@ -107,7 +112,7 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o tipo" />
@@ -152,7 +157,7 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Categoria</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a categoria" />
