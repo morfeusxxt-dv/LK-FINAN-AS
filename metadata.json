@@ -1,0 +1,6 @@
+{
+  "name": "LK FINANÇAS",
+  "description": "Sistema de gestão financeira pessoal LK FINANÇAS com persistência IndexedDB, gráficos e backup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
