@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS categories (
   type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
   icon TEXT,
   color TEXT,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   description TEXT,
   date TIMESTAMP WITH TIME ZONE NOT NULL,
   month_year TEXT NOT NULL, -- Format: YYYY-MM for easy filtering
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -34,14 +34,14 @@ CREATE TABLE IF NOT EXISTS budgets (
   category_id BIGINT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   amount DECIMAL(10, 2) NOT NULL,
   month_year TEXT NOT NULL,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create settings table
 CREATE TABLE IF NOT EXISTS settings (
   id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL UNIQUE,
   currency TEXT DEFAULT 'BRL',
   theme TEXT DEFAULT 'dark' CHECK (theme IN ('light', 'dark')),
   monthly_budget_goal DECIMAL(10, 2) DEFAULT 0,
