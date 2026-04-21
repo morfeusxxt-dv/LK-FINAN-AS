@@ -177,7 +177,29 @@ function AppContent() {
                 <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Fluxo de Caixa Mensal</h3>
                 <div className="h-px flex-1 bg-slate-800/50 mx-4"></div>
               </div>
-              <TransactionsTable transactions={transactions.slice(0, 5)} categories={categories} />
+              <TransactionsTable 
+              transactions={transactions.slice(0, 5)} 
+              categories={categories}
+              onSuccess={() => {
+                // Reload data after successful transaction delete
+                const loadData = async () => {
+                  try {
+                    const monthStr = format(selectedMonth, "yyyy-MM");
+                    const [transData, catsData, settingsData] = await Promise.all([
+                      dbService.getTransactions(ADMIN_ID, monthStr),
+                      dbService.getCategories(ADMIN_ID),
+                      dbService.getSettings(ADMIN_ID),
+                    ]);
+                    setTransactions(transData || []);
+                    setCategories(catsData || []);
+                    setSettings(settingsData);
+                  } catch (error) {
+                    console.error('Error reloading data:', error);
+                  }
+                };
+                loadData();
+              }}
+            />
             </div>
           </motion.div>
         );
@@ -189,7 +211,29 @@ function AppContent() {
             exit={{ opacity: 0, x: -20 }}
           >
             <h2 className="text-xl font-bold mb-4">Extrato Detalhado</h2>
-            <TransactionsTable transactions={transactions} categories={categories} />
+            <TransactionsTable 
+              transactions={transactions} 
+              categories={categories}
+              onSuccess={() => {
+                // Reload data after successful transaction delete
+                const loadData = async () => {
+                  try {
+                    const monthStr = format(selectedMonth, "yyyy-MM");
+                    const [transData, catsData, settingsData] = await Promise.all([
+                      dbService.getTransactions(ADMIN_ID, monthStr),
+                      dbService.getCategories(ADMIN_ID),
+                      dbService.getSettings(ADMIN_ID),
+                    ]);
+                    setTransactions(transData || []);
+                    setCategories(catsData || []);
+                    setSettings(settingsData);
+                  } catch (error) {
+                    console.error('Error reloading data:', error);
+                  }
+                };
+                loadData();
+              }}
+            />
           </motion.div>
         );
       case "categories":

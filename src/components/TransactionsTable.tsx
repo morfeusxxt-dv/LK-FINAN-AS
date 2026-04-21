@@ -1,4 +1,4 @@
-import { Transaction, Category } from "@/types";
+import { Transaction, Category } from "../lib/supabase-types";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -20,29 +20,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useMemo } from "react";
-import { db } from "@/lib/db";
+import { dbService } from "../lib/supabase-db";
 import { toast } from "sonner";
 
 interface TransactionsTableProps {
   transactions: Transaction[];
   categories: Category[];
+  onSuccess?: () => void;
 }
 
-export function TransactionsTable({ transactions, categories }: TransactionsTableProps) {
+export function TransactionsTable({ transactions, categories, onSuccess }: TransactionsTableProps) {
+  const ADMIN_ID = '00000000-0000-0000-0000-000000000000';
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => 
       t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      categories.find(c => c.id === t.categoryId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ).sort((a, b) => b.date.getTime() - a.date.getTime());
+      categories.find(c => c.id === t.category_id)?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, categories, searchTerm]);
 
   const handleDelete = async (id?: number) => {
     if (!id) return;
     if (confirm("Tem certeza que deseja excluir esta transação?")) {
-      await db.transactions.delete(id);
+      await dbService.deleteTransaction(id, ADMIN_ID);
       toast.success("Transação excluída.");
+      if (onSuccess) onSuccess();
     }
   };
 
