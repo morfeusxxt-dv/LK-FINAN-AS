@@ -64,6 +64,26 @@ ALTER TABLE transactions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE budgets DISABLE ROW LEVEL SECURITY;
 ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
 
+-- Drop existing foreign key constraints if tables exist
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'categories_user_id_fkey' AND table_name = 'categories') THEN
+    ALTER TABLE categories DROP CONSTRAINT categories_user_id_fkey;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'transactions_user_id_fkey' AND table_name = 'transactions') THEN
+    ALTER TABLE transactions DROP CONSTRAINT transactions_user_id_fkey;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'budgets_user_id_fkey' AND table_name = 'budgets') THEN
+    ALTER TABLE budgets DROP CONSTRAINT budgets_user_id_fkey;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'settings_user_id_fkey' AND table_name = 'settings') THEN
+    ALTER TABLE settings DROP CONSTRAINT settings_user_id_fkey;
+  END IF;
+END $$;
+
 -- Insert initial categories for admin user
 INSERT INTO categories (name, type, color, user_id) VALUES
   ('Salário', 'income', '#10b981', '00000000-0000-0000-0000-000000000000'),
