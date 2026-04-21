@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   category_id BIGINT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   description TEXT,
   date TIMESTAMP WITH TIME ZONE NOT NULL,
-  month_year TEXT NOT NULL, -- Format: YYYY-MM for easy filtering
+  month_year TEXT NOT NULL,
   user_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -96,6 +96,11 @@ INSERT INTO categories (name, type, color, user_id) VALUES
   ('Saúde', 'expense', '#06b6d4', '00000000-0000-0000-0000-000000000000'),
   ('Educação', 'expense', '#6366f1', '00000000-0000-0000-0000-000000000000')
 ON CONFLICT DO NOTHING;
+
+-- Insert initial settings for admin user
+INSERT INTO settings (user_id, currency, theme, monthly_budget_goal) VALUES
+  ('00000000-0000-0000-0000-000000000000', 'BRL', 'dark', 0)
+ON CONFLICT (user_id) DO NOTHING;
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
