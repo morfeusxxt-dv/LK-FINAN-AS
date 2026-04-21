@@ -166,20 +166,24 @@ export function TransactionForm({ open, onOpenChange, onSuccess }: TransactionFo
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Categoria</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a categoria" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
+                    <FormControl>
+                      <div className="grid grid-cols-2 gap-2">
                         {filteredCategories.map((category) => (
-                          <SelectItem key={category.id} value={category.id?.toString() || ""}>
+                          <Button
+                            key={category.id}
+                            type="button"
+                            variant={field.value === category.id?.toString() ? "default" : "outline"}
+                            onClick={() => field.onChange(category.id?.toString() || "")}
+                            className={field.value === category.id?.toString() ? "bg-sky-500 hover:bg-sky-600" : ""}
+                            style={{
+                              borderColor: category.color,
+                            }}
+                          >
                             {category.name}
-                          </SelectItem>
+                          </Button>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
